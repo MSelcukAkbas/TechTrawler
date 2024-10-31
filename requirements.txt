@@ -1,0 +1,8 @@
+requests
+beautifulsoup4
+pandas
+cachetools
+
+#            pip install requests beautifulsoup4 pandas cachetools
+
+#            py 3.9.19    
