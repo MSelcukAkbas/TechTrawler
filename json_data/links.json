@@ -1,32 +1,43 @@
 {
     "Sinerji": {
+        "https://www.sinerji.gen.tr/oyun-bilgisayari-c-2116":"gaming_system",
+        "https://www.sinerji.gen.tr/is-ofis-bilgisayari-c-2117" : "office_system",
         "https://www.sinerji.gen.tr/islemci-c-1": "cpu",
         "https://www.sinerji.gen.tr/anakart-c-2009": "motherboard",
         "https://www.sinerji.gen.tr/bellek-ram-c-2010": "memory",
         "https://www.sinerji.gen.tr/ekran-karti-c-2023": "gpu",
         "https://www.sinerji.gen.tr/guc-kaynagi-c-2030": "psu",
-        "https://www.sinerji.gen.tr/ssd-disk-c-2147" : "ssd" 
+        "https://www.sinerji.gen.tr/ssd-disk-c-2147" : "ssd" ,
+        "https://www.sinerji.gen.tr/pc-diski-c-2173" : "hdd"
     },
     "Itopya": {
+        "https://www.itopya.com/HazirSistemler":"gaming_system",
         "https://www.itopya.com/islemci_k8": "cpu",
         "https://www.itopya.com/anakart_k9": "motherboard",
         "https://www.itopya.com/ram_k10": "memory",
         "https://www.itopya.com/ekran-karti_k11": "gpu",
         "https://www.itopya.com/powersupply_k17": "psu" ,
-        "https://www.itopya.com/ssd_k20"  : "ssd"
+        "https://www.itopya.com/ssd_k20"  : "ssd",
+        "https://www.itopya.com/sabit-disk_k25": "hdd"
     },
     "incehesap" : {
+        "https://www.incehesap.com/hazir-sistemler-fiyatlari/":"gaming_system",
         "https://www.incehesap.com/islemci-fiyatlari/" :"cpu" , 
         "https://www.incehesap.com/anakart-fiyatlari/" : "motherboard" , 
         "https://www.incehesap.com/ekran-karti-fiyatlari/" : "gpu" , 
         "https://www.incehesap.com/ram-fiyatlari/" : "memory" , 
         "https://www.incehesap.com/power-supply-fiyatlari/" : "psu" ,
-        "https://www.incehesap.com/ssd-harddisk-fiyatlari/" : "ssd"
+        "https://www.incehesap.com/ssd-harddisk-fiyatlari/" : "ssd",
+        "https://www.incehesap.com/pc-harddisk-fiyatlari/" :"hdd"
     },
     "GameGaraj": {
-        "https://www.gamegaraj.com/grup/pc-bilesenleri/ekran-karti-oem-urunler/": "gpu",
+        "https://www.gamegaraj.com/grup/masaustu-bilgisayar/":"gaming_system",
+        "https://www.gamegaraj.com/grup /pc-bilesenleri/islemci-oem-urunler/" : "cpu",
         "https://www.gamegaraj.com/grup/pc-bilesenleri/anakart-oem-urunler/": "motherboard",
+        "https://www.gamegaraj.com/grup/pc-bilesenleri/ram-oem-urunler/" : "memory",
+        "https://www.gamegaraj.com/grup/pc-bilesenleri/ekran-karti-oem-urunler/": "gpu",
         "https://www.gamegaraj.com/grup/pc-bilesenleri/guc-kaynagi-oem-urunler/": "psu",
-        "https://www.gamegaraj.com/grup/pc-bilesenleri/ssd-oem-urunler/" : "ssd"
+        "https://www.gamegaraj.com/grup/pc-bilesenleri/ssd-oem-urunler/" : "ssd",
+        "https://www.gamegaraj.com/grup/pc-bilesenleri/hdd-oem-urunler/" : "hdd"
     }
 }

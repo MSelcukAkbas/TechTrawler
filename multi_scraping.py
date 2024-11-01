@@ -81,7 +81,7 @@ class PageFetcher:
                 response = req.get(url, headers=header, timeout=timeout)
                 response.raise_for_status()
                 soup = bea(response.text, "html.parser")
-                self.cache[url] = soup  # O anki sayfayı önbelleğe al
+                self.cache[url] = soup
                 return soup
             
             except req.exceptions.HTTPError as http_err:
@@ -273,9 +273,13 @@ class WebScraper:
         self.save_to_csv(all_products, site_name, category_name)
 
     def run(self):
+        start_time = time.time()
         with ThreadPoolExecutor() as executor:
             for site_name, site_categories in self.config.links.items():
                 executor.map(lambda item: self.scrape_products(item[0], item[1], site_name), site_categories.items())
+        end_time = time.time()
+        elapsed_time = end_time - start_time  
+        print(f"total {elapsed_time:.2f} seconds")
 
 if __name__ == "__main__":
     config = Config()
@@ -283,3 +287,4 @@ if __name__ == "__main__":
     scraper = WebScraper(config=config,
                         PageFetcher=pageFetcher)
     scraper.run()
+
