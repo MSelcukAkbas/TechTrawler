@@ -8,6 +8,7 @@ import json
 import random
 import time
 from cachetools import TTLCache
+from functools import partial
 
 cofig_dir_path = "json_data/"
 
@@ -158,7 +159,9 @@ class WebScraper:
 
                 return 1
 
-    def extract_products(self, soup: bea, site_name: str) -> list:
+
+
+    def extract_products(self, soup: bea, site_name: str, tür: str =None) -> list:
         """
         BeautifulSoup nesnesinden ürünleri çıkarır.
 
@@ -178,7 +181,11 @@ class WebScraper:
                 title = product.select_one(".edgtf-product-list-title a").text.strip()
                 product_link = product.select_one(".edgtf-product-list-title a")["href"]
                 manufacturer = self.get_manufacturer(title)
-                all_products.append({"İsim": title, "Fiyat": price, "Üretici": manufacturer, "Link": product_link})
+                all_products.append({"İsim": title, 
+                                     
+                                    "Fiyat": price, 
+                                    "Üretici": manufacturer, 
+                                    "Link": product_link})
 
         elif site_name == "Itopya":
             for product in soup.select('#productList > div'):
@@ -205,7 +212,7 @@ class WebScraper:
                         key, value = spec_text.split(':', 1)
                         specs_dict[key.strip()] = value.strip()
                 manufacturer = self.get_manufacturer(product_name)
-                product_info = {"İsim": product_name, "Üretici": manufacturer if manufacturer else "Bilinmiyor", "Link": "https://www.sinerji.gen.tr" + product_link}
+                product_info = {"İsim": product_name.replace('"', ''), "Üretici": manufacturer if manufacturer else "Bilinmiyor", "Link": "https://www.sinerji.gen.tr" + product_link}
                 product_info.update(specs_dict)
                 all_products.append(product_info)
         
@@ -218,7 +225,8 @@ class WebScraper:
                 price_element = product.find('span', class_='mx-auto whitespace-nowrap text-lg font-bold leading-none tracking-tight text-orange-500 md:text-2xl mb-2')
                 price = price_element.text.strip() if price_element else "Fiyat yok"
                 manufacturer = self.get_manufacturer(title)
-                all_products.append({"İsim": title, "Fiyat": price, "Üretici": manufacturer, "Link": product_link})
+                all_products.append({"İsim": title,
+                                      "Fiyat": price, "Üretici": manufacturer, "Link": product_link})
 
         return all_products
 
@@ -272,11 +280,15 @@ class WebScraper:
 
         self.save_to_csv(all_products, site_name, category_name)
 
+    def scrape_and_log(self,url_category_pair, site_name):
+        url, category = url_category_pair
+        self.scrape_products(url, category, site_name)
+
     def run(self):
         start_time = time.time()
-        with ThreadPoolExecutor() as executor:
+        with ThreadPoolExecutor(max_workers=16) as executor:
             for site_name, site_categories in self.config.links.items():
-                executor.map(lambda item: self.scrape_products(item[0], item[1], site_name), site_categories.items())
+                executor.map(partial(self.scrape_and_log, site_name=site_name), site_categories.items())
         end_time = time.time()
         elapsed_time = end_time - start_time  
         print(f"total {elapsed_time:.2f} seconds")
