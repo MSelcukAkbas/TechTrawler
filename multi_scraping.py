@@ -9,6 +9,9 @@ import random
 import time
 from cachetools import TTLCache
 from functools import partial
+import re
+from tqdm import tqdm
+import inspect
 
 cofig_dir_path = "json_data/"
 
@@ -20,6 +23,7 @@ class Config:
         self.user_agents = self.load_json(f'{cofig_dir_path}user_agents.json')
         self.links = self.load_json(f'{cofig_dir_path}links.json')
         self.manufacturers = self.load_json(f'{cofig_dir_path}manufacturers.json')
+        self.error_log= f'{cofig_dir_path}error_log.json'
 
     def load_json(self, path: str) -> dict:
         """
@@ -34,12 +38,26 @@ class Config:
         try:
             with open(path, 'r', encoding='utf-8') as f:
                 return json.load(f)
-        except FileNotFoundError:
-            print(f"Hata: {path} dosyası bulunamadı.")
+        except FileNotFoundError as e:
+            self.save_error_to_json(e)
             return {}
-        except json.JSONDecodeError:
-            print(f"Hata: {path} dosyası okunurken bir hata oluştu.")
+        except json.JSONDecodeError as e :
+            self.save_error_to_json(e)
             return {}
+        
+    def save_error_to_json(self, exception):
+        function_name = inspect.currentframe().f_back.f_code.co_name
+        
+        error_info = {
+            'error_name': type(exception).__name__, 
+            'error_message': str(exception),          
+            'function_name': function_name,       
+            'timestamp': datetime.now().isoformat() }
+        try:
+            with open(self.error_log, 'a') as file:
+                file.write(json.dumps(error_info) + '\n')
+        except Exception as e:
+            print(f"Dosyaya kaydederken hata oluştu: {e}")
 
 class PageFetcher:
     def __init__(self, config: Config, retries: int = 5, delay: int = 2):
@@ -77,7 +95,7 @@ class PageFetcher:
             
             header = random.choice(self.config.user_agents.get('user_agents', [])) 
             try:
-                if attempt != 0:
+                if attempt >= 3:
                     print(f"{attempt + 1}. deneme: {url}")
                 response = req.get(url, headers=header, timeout=timeout)
                 response.raise_for_status()
@@ -85,14 +103,8 @@ class PageFetcher:
                 self.cache[url] = soup
                 return soup
             
-            except req.exceptions.HTTPError as http_err:
-                print(f"HTTP hatası oluştu: {http_err} (URL: {url})")
-            except req.exceptions.ConnectionError as conn_err:
-                print(f"Bağlantı hatası oluştu: {conn_err} (URL: {url})")
-            except req.exceptions.Timeout as timeout_err:
-                print(f"Zaman aşımı hatası oluştu: {timeout_err} (URL: {url})")
-            except req.exceptions.RequestException as req_err:
-                print(f"Bir hata oluştu: {req_err} (URL: {url})")
+            except Exception as e:
+                self.config.save_error_to_json(e)
 
             time.sleep(self.delay)
         return None
@@ -111,7 +123,7 @@ class WebScraper:
         os.makedirs(self.main_directory, exist_ok=True)
         self.config =config
         self.page_fetcher = PageFetcher
-        
+
     def get_manufacturer(self, product_name: str) -> str:
         """
         Ürün adından üreticiyi alır.
@@ -122,11 +134,16 @@ class WebScraper:
         Returns:
             str: Üretici adı.
         """
-        for key in self.config.manufacturers:
-            if key in product_name:
-                return self.config.manufacturers[key]
-        return product_name.split(" ")[0]
-
+        try:
+            for key in self.config.manufacturers:
+                if re.search(key, product_name, re.IGNORECASE):
+                    return self.config.manufacturers[key]
+            
+            return product_name.split(" ")[0]
+        except Exception as e:
+            self.config.save_error_to_json(e)
+            return None 
+    
     def get_total_pages(self, soup: bea, site_name: str) -> int:
         """
         Verilen BeautifulSoup nesnesinden toplam sayfa sayısını alır.
@@ -136,30 +153,47 @@ class WebScraper:
             site_name (str): Site adı.
 
         Returns:
-            int: Toplam sayfa sayısı.
+            int: Toplam sayfa sayısı ya da 1 
         """
-        if site_name == "GameGaraj":
-            page_number_element = soup.select_one("body > div.edgtf-wrapper > div > div.edgtf-content > div > div.edgtf-container > div > div > div.edgtf-page-content-holder.edgtf-grid-col-9.edgtf-grid-col-push-3 > nav > ul > li:nth-child(2) > a")
-            return int(page_number_element.text.strip()) if page_number_element else 1
-        elif site_name == "Itopya":
-            return int(soup.select_one('body > section.container-fluid > div > div.col-12.col-md-9.col-lg-9.col-xl-10 > div:nth-child(5) > div.actions > span > strong').get_text().strip().split('/')[1]) if soup else 1
-        elif site_name == "Sinerji":
-            page_links = soup.select("a[href*='?px=']")
-            return max(int(link.text) for link in page_links if link.text.isdigit())
-        elif site_name == "incehesap":
-            page_links = soup.select("body > main > div.container.space-y-5.pb-5 > div.flex.flex-col.xl\\:flex-row.gap-5 > div > div.card.flex.items-center.justify-betweensm\\:px-6 > nav > a")
+        try:
+            if site_name == "GameGaraj":
+                page_number_element = soup.select_one("body > div.edgtf-wrapper > div > div.edgtf-content > div > div.edgtf-container > div > div > div.edgtf-page-content-holder.edgtf-grid-col-9.edgtf-grid-col-push-3 > nav > ul > li:nth-child(2) > a")
+                if page_number_element:
+                    total_pages = int(page_number_element.text.strip())
+                else:
+                    total_pages = 1
 
-            if page_links:
-                return max(
-                    int(link.get('href', '').split('/sayfa-')[-1].strip('/'))
-                    for link in page_links
-                    if '/sayfa-' in link.get('href', '')
-                )
+            elif site_name == "Itopya":
+                strong_element = soup.select_one('body > section.container-fluid > div > div.col-12.col-md-9.col-lg-9.col-xl-10 > div:nth-child(5) > div.actions > span > strong')
+                if strong_element:
+                    total_pages_text = strong_element.get_text().strip()
+                    total_pages = int(total_pages_text.split('/')[1])
+                else:
+                    total_pages = 1
+
+            elif site_name == "Sinerji":
+                page_links = soup.select("a[href*='?px=']")
+                total_pages = max(int(link.text) for link in page_links if link.text.isdigit()) if page_links else 1
+                
+            elif site_name == "incehesap":
+                page_links = soup.select("body > main > div.container.space-y-5.pb-5 > div.flex.flex-col.xl\\:flex-row.gap-5 > div > div.card.flex.items-center.justify-betweensm\\:px-6 > nav > a")
+                if page_links:
+                    total_pages = max(
+                        int(link.get('href', '').split('/sayfa-')[-1].strip('/'))
+                        for link in page_links
+                        if '/sayfa-' in link.get('href', '')
+                    )
+                else:
+                    total_pages = 1
+                
             else:
+                total_pages = 1
 
-                return 1
+        except (IndexError, ValueError) as e:
+            self.config.save_error_to_json(e)
+            total_pages = 1
 
-
+        return total_pages
 
     def extract_products(self, soup: bea, site_name: str, tür: str =None) -> list:
         """
@@ -182,7 +216,6 @@ class WebScraper:
                 product_link = product.select_one(".edgtf-product-list-title a")["href"]
                 manufacturer = self.get_manufacturer(title)
                 all_products.append({"İsim": title, 
-                                     
                                     "Fiyat": price, 
                                     "Üretici": manufacturer, 
                                     "Link": product_link})
@@ -226,7 +259,7 @@ class WebScraper:
                 price = price_element.text.strip() if price_element else "Fiyat yok"
                 manufacturer = self.get_manufacturer(title)
                 all_products.append({"İsim": title,
-                                      "Fiyat": price, "Üretici": manufacturer, "Link": product_link})
+                                    "Fiyat": price, "Üretici": manufacturer, "Link": product_link})
 
         return all_products
 
@@ -238,15 +271,22 @@ class WebScraper:
             all_products (list): Ürün bilgilerini içeren sözlükler.
             site_name (str): Site adı.
             category_name (str): Kategori adı.
-        """
-        df = pd.DataFrame(all_products)
-        timestamp_directory = f"{site_name}_{self.formatli_tarih_saat}"
-        full_directory = os.path.join(self.main_directory, timestamp_directory)
-        os.makedirs(full_directory, exist_ok=True)
 
-        csv_filename = f"{site_name}_{category_name}.csv"
-        df.to_csv(os.path.join(full_directory, csv_filename), index=False, encoding='utf-8-sig')
-        print(f"{len(all_products)} {category_name} bilgisi '{csv_filename}' dosyasına kaydedildi.")
+        Returns:
+            str: CSV dosyasına kaydedilen ürün sayısını belirten bir mesaj.
+        """
+        try:
+            df = pd.DataFrame(all_products)
+            timestamp_directory = f"{site_name}_{self.formatli_tarih_saat}"
+            full_directory = os.path.join(self.main_directory, timestamp_directory)
+            os.makedirs(full_directory, exist_ok=True)
+
+            csv_filename = f"{site_name}_{category_name}.csv"
+            df.to_csv(os.path.join(full_directory, csv_filename), index=False, encoding='utf-8-sig')
+            message = f"{len(all_products)} {category_name} bilgisi '{csv_filename}' dosyasına kaydedildi."
+            return message
+        except Exception as e:
+            self.config.save_error_to_json(e)
 
     def scrape_products(self, url: str, category_name: str, site_name: str) -> None:
         """
@@ -258,45 +298,90 @@ class WebScraper:
             site_name (str): Web sitesinin adı.
 
         Returns:
-            None: Bu fonksiyon, çekilen ürünleri CSV dosyasına kaydeder ve geri dönüş değeri yoktur.
+            tuple: Çekilen tüm ürünler, site adı ve kategori adı.
         """
         all_products = []
-        
-        soup = self.page_fetcher.fetch(url)
-        if not soup:
-            print(f"Sayfa alınamadı: {url}. İşlem durduruluyor.")
-            return
 
-        total_pages = self.get_total_pages(soup, site_name)
-
-        for page_num in range(1, total_pages + 1):
-            page_url = f"{url}?pg={page_num}"
-            soup = self.page_fetcher.fetch(page_url)
+        try:
+            soup = self.page_fetcher.fetch(url)
             if not soup:
-                print(f"Sayfa alınamadı: {page_url}. Atlanıyor.")
-                continue
+                return
             
-            all_products.extend(self.extract_products(soup, site_name))
+            total_pages = self.get_total_pages(soup, site_name)
 
-        self.save_to_csv(all_products, site_name, category_name)
+            for page_num in range(1, total_pages + 1):
+                if page_num == 1:
+                    page_url = f"{url}"
+                else:
+                    page_url = f"{url}?pg={page_num}"
+                
+                soup = self.page_fetcher.fetch(page_url)
+                if not soup:
+                    continue  
 
-    def scrape_and_log(self,url_category_pair, site_name):
-        url, category = url_category_pair
-        self.scrape_products(url, category, site_name)
+                all_products.extend(self.extract_products(soup, site_name))
+
+            return all_products, site_name, category_name
+        except Exception as e:
+            self.config.save_error_to_json(e)
+
+    def scrape_and_log(self, url_category_pair, site_name):
+        """
+        Verilen URL ve kategori çiftini kullanarak ürünleri çeker ve verileri CSV dosyasına kaydeder.
+
+        Bu metod, belirtilen URL'den ürünleri almak için `scrape_products` fonksiyonunu çağırır
+        ve elde edilen ürün verilerini belirtilen site ve kategori adıyla birlikte bir CSV dosyasına
+        kaydeder. Hata durumunda, hata kaydedilir ve kullanıcıya bilgi verilir.
+
+        Args:
+            url_category_pair (tuple): URL ve kategori çiftini içeren bir tuple.
+            site_name (str): Ürünlerin çekileceği site adı.
+        """
+        try:
+            url, category = url_category_pair
+            all_products, site_name, category_name = self.scrape_products(url, category, site_name)
+            self.save_to_csv(all_products, site_name, category_name)
+        except Exception as e:
+            self.config.save_error_to_json(e)
 
     def run(self):
-        start_time = time.time()
-        with ThreadPoolExecutor(max_workers=16) as executor:
-            for site_name, site_categories in self.config.links.items():
-                executor.map(partial(self.scrape_and_log, site_name=site_name), site_categories.items())
-        end_time = time.time()
-        elapsed_time = end_time - start_time  
-        print(f"total {elapsed_time:.2f} seconds")
+        """
+        Çoklu iş parçacığı kullanarak web scraping işlemini gerçekleştirir. 
+
+        Bu metod, tüm bağlantıları ve kategorileri içeren bir yapıdan yararlanarak
+        verileri çekmek için bir iş parçacığı havuzu oluşturur. Her kategori için
+        bir iş parçacığı başlatılır ve işlemin ilerleyişi bir çubuk ile gösterilir. 
+        İşlem tamamlandığında toplam süre hesaplanır. 
+
+        Hata durumunda, tüm hatalar tek bir try-except bloğunda yakalanarak
+        kaydedilir ve kullanıcıya bilgi verilir.
+        """
+        try:
+            start_time = time.time()
+            max_workers = os.cpu_count() * 2
+            total_tasks = sum(len(categories) for site, categories in self.config.links.items())
+            
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = []
+
+                with tqdm(total=total_tasks, desc="İlerleme", unit="kategori") as pbar:
+                    for site_name, site_categories in self.config.links.items():
+                        for category_pair in site_categories.items():
+                            future = executor.submit(self.scrape_and_log, category_pair, site_name)
+                            future.add_done_callback(lambda _: pbar.update(1)) 
+                            futures.append(future)
+
+                    for future in futures:
+                        future.result()
+
+            print(f"Toplam süre: {((time.time()) - start_time):.2f} saniye")
+            
+        except Exception as e:
+            self.config.save_error_to_json(e)
 
 if __name__ == "__main__":
     config = Config()
-    pageFetcher =PageFetcher(config=config)
-    scraper = WebScraper(config=config,
-                        PageFetcher=pageFetcher)
+    page_fetcher = PageFetcher(config=config)
+    scraper = WebScraper(config=config, PageFetcher=page_fetcher)
     scraper.run()
 
