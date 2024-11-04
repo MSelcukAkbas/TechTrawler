@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from multi_scraping import PageFetcher, Config
+from TechCrawler import PageFetcher, Config
 
 config = Config()
 pageFetcher = PageFetcher(config=config)

@@ -8,7 +8,7 @@ import json
 import random
 import time
 from cachetools import TTLCache
-from multi_scraping import WebScraper
+from TechCrawler import WebScraper
 cofig_dir_path = "json_data/"
 
 class Config:
