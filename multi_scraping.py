@@ -174,7 +174,7 @@ class WebScraper:
             elif site_name == "Sinerji":
                 page_links = soup.select("a[href*='?px=']")
                 total_pages = max(int(link.text) for link in page_links if link.text.isdigit()) if page_links else 1
-                
+            
             elif site_name == "incehesap":
                 page_links = soup.select("body > main > div.container.space-y-5.pb-5 > div.flex.flex-col.xl\\:flex-row.gap-5 > div > div.card.flex.items-center.justify-betweensm\\:px-6 > nav > a")
                 if page_links:
@@ -185,15 +185,31 @@ class WebScraper:
                     )
                 else:
                     total_pages = 1
-                
+                    
+            elif site_name == "teknosa":
+                page_links = soup.select_one("#site-main > div > div > div.col-12.section-1 > div > div > div.plp-grid > div.plp-body > div.plp-paging > div.plp-paging-button > button > span")
+                if page_links and page_links.text:
+                    split_text = page_links.text.split("/")
+                    if len(split_text) > 1:
+                        total_pages = int(split_text[1].strip().replace(")", "")) - 1
+                    else:
+                        total_pages = 1
+            elif site_name == "tebilon":
+                page_links =  soup.select_one("#mainPage > main > section.showcase > div > div > div.showcase__showcaseProducts.col-md-12.col-sm-12.col-xs-12.mobileShow > div.col-md-12.productSort__paginationBottom > div > a:nth-child(5)")
+                if page_links and page_links.text:
+                        total_pages = int(page_links.text)
+                else:
+                    total_pages = 1
             else:
                 total_pages = 1
-
+            last_try = total_pages * 3
         except (IndexError, ValueError) as e:
             self.config.save_error_to_json(e)
             total_pages = 1
-
-        return total_pages
+        if isinstance(total_pages, int):
+            return total_pages
+        else:
+            return 1
 
     def extract_products(self, soup: bea, site_name: str, tür: str =None) -> list:
         """
@@ -224,12 +240,14 @@ class WebScraper:
             for product in soup.select('#productList > div'):
                 link_tag = product.select_one('div.product-body > h2 > a')
                 if link_tag:
-                    link = link_tag['href'] if link_tag['href'].startswith("http") else "https://www.itopya.com" + link_tag['href']
+                    product_link = link_tag['href'] if link_tag['href'].startswith("http") else "https://www.itopya.com" + link_tag['href']
                     title = link_tag.get_text().strip()
                     price_tag = product.select_one('div.product-footer > div.price > strong')
-                    price_text = price_tag.get_text().strip().replace('\xa0', '').replace('₺', '').strip() if price_tag else "nan"
-                    manufacturer = self.get_manufacturer(title) if price_text and price_text != "nan" else "Bilinmiyor"
-                    all_products.append({"İsim": title, "Fiyat": price_text, "Üretici": manufacturer, "Link": link})
+                    price = price_tag.get_text().strip().replace('\xa0', '').replace('₺', '').strip() if price_tag else "nan"
+                    manufacturer = self.get_manufacturer(title) if price != "nan" else "Bilinmiyor"
+                    all_products.append({
+                        "İsim": title, "Fiyat": price,
+                        "Üretici": manufacturer, "Link": product_link})
 
         elif site_name == "Sinerji":
             products = soup.select("section article")
@@ -258,9 +276,40 @@ class WebScraper:
                 price_element = product.find('span', class_='mx-auto whitespace-nowrap text-lg font-bold leading-none tracking-tight text-orange-500 md:text-2xl mb-2')
                 price = price_element.text.strip() if price_element else "Fiyat yok"
                 manufacturer = self.get_manufacturer(title)
-                all_products.append({"İsim": title,
-                                    "Fiyat": price, "Üretici": manufacturer, "Link": product_link})
+                all_products.append({
+                    "İsim": title, "Fiyat": price,
+                    "Üretici": manufacturer, "Link": product_link})
+                
+        elif site_name == "teknosa":
+            product_list = soup.select("#product-item")
+            for product in product_list:
+                name_link_manufacturer = product.select_one("a")
+                title = name_link_manufacturer.get('title', "isim bulunamadı") if name_link_manufacturer else "isim bulunamadı"
+                product_link = name_link_manufacturer['href'] if name_link_manufacturer and name_link_manufacturer['href'].startswith("http") else "https://www.teknosa.com" + name_link_manufacturer['href'] if name_link_manufacturer else "Link bulunamadı"
+                price = product.select_one("input").get('value', "Fiyat bulunamadı") if product.select_one("input") else "Fiyat bulunamadı"
+                manufacturer = title.split()[0] if title != "isim bulunamadı" else "bulunamadı"
+                all_products.append({
+                    "İsim": title, "Fiyat": price,
+                    "Üretici": manufacturer, "Link": product_link})
+        elif site_name =="tebilon":
+            product_list = soup.select("#allProducts > div > div")
+            for product in product_list:
+                name_link_manufacturer = product.select_one("div > div > div > div.showcase__shadow.col-md-12.no-padding > div.showcase__title.col-md-12.text-center.no-padding.mobileShow > a")
+                price_tag = product.select_one("div > div > div > div.showcase__shadow.col-md-12.no-padding > div:nth-child(4) > div > div > div.new.newPrice.col-md-12.col-12.text-center")
 
+                title = name_link_manufacturer.text if name_link_manufacturer else "isim bulunamadı"
+                product_link = (name_link_manufacturer['href'] if name_link_manufacturer and name_link_manufacturer['href'].startswith("http") 
+                                else f"https://www.tebilon.com{name_link_manufacturer['href']}" if name_link_manufacturer else "Link bulunamadı")
+                price = price_tag.text.strip() if price_tag else "Fiyat bulunamadı"
+                manufacturer = title.split()[0] if title != "isim bulunamadı" else "bulunamadı"
+                
+                all_products.append({
+                    "İsim": title,
+                    "Fiyat": price,
+                    "Üretici": manufacturer,
+                    "Link": product_link
+                })
+                            
         return all_products
 
     def save_to_csv(self, all_products: list, site_name: str, category_name: str) -> None:
@@ -307,14 +356,21 @@ class WebScraper:
             if not soup:
                 return
             
-            total_pages = self.get_total_pages(soup, site_name)
+            total_pages =int( self.get_total_pages(soup, site_name) )
 
             for page_num in range(1, total_pages + 1):
                 if page_num == 1:
                     page_url = f"{url}"
                 else:
-                    page_url = f"{url}?pg={page_num}"
-                
+                    if site_name == "tebilon" or site_name == "teknosa":
+                        page_url = f"{url}?page={page_num}"
+                    elif site_name == "sinerji":
+                        page_url = f"{url}?px={page_num}"
+                    elif site_name == "itopta":
+                        page_url = f"{url}?pg={page_num}"
+                    elif site_name == "gamegaraj":
+                        page_url = f"{url}/page/{page_num}/"
+                        
                 soup = self.page_fetcher.fetch(page_url)
                 if not soup:
                     continue  

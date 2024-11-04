@@ -45,12 +45,21 @@
     "tebilon" : {
         "https://www.tebilon.com/hazir-sistemler/" :"gaming_system",
         "https://www.tebilon.com/bilgisayar-parcalari/islemci/": "cpu",
-        "https://www.tebilon.com/bilgisayar-parcalari/anakart/": "motherboard",
+        "https://www.tebilon.com/bilgisayar-parcalari/anakart/": "motherboard",     
         "https://www.tebilon.com/bilgisayar-parcalari/ram/": "memory",
         "https://www.tebilon.com/bilgisayar-parcalari/ekran-karti/": "gpu",
         "https://www.tebilon.com/bilgisayar-parcalari/ssd/" : "ssd",
         "https://www.tebilon.com/bilgisayar-parcalari/hard-disk/"  : "hdd",
         "https://www.tebilon.com/bilgisayar-parcalari/guc-kaynaklari-psu/": "psu"
-
+    },
+    "teknosa":{
+        "https://www.teknosa.com/oyuncu-bilgisayari-c-116006" : "gaming_system",
+        "https://www.teknosa.com/islemci-c-116001001": "cpu",
+        "https://www.teknosa.com/anakart-c-116001002": "motherboard",
+        "https://www.teknosa.com/ram-c-116001003": "memory",
+        "https://www.teknosa.com/ekran-karti-c-116001004": "gpu",
+        "https://www.teknosa.com/ssd-c-116001008": "ssd",
+        "https://www.teknosa.com/harddisk-c-116001007": "hdd",
+        "https://www.teknosa.com/guc-kaynagi-c-116001005": "psu"
     }
 }
