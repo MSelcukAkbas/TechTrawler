@@ -1,5 +1,15 @@
 {
-    "Sinerji": {
+    "teknosa":{
+        "https://www.teknosa.com/oyuncu-bilgisayari-c-116006" : "gaming_system",
+        "https://www.teknosa.com/islemci-c-116001001": "cpu",
+        "https://www.teknosa.com/anakart-c-116001002": "motherboard",
+        "https://www.teknosa.com/ram-c-116001003": "memory",
+        "https://www.teknosa.com/ekran-karti-c-116001004": "gpu",
+        "https://www.teknosa.com/ssd-c-116001008": "ssd",
+        "https://www.teknosa.com/harddisk-c-116001007": "hdd",
+        "https://www.teknosa.com/guc-kaynagi-c-116001005": "psu"
+    },
+    "sinerji": {
         "https://www.sinerji.gen.tr/oyun-bilgisayari-c-2116":"gaming_system",
         "https://www.sinerji.gen.tr/is-ofis-bilgisayari-c-2117" : "office_system",
         "https://www.sinerji.gen.tr/islemci-c-1": "cpu",
@@ -10,7 +20,7 @@
         "https://www.sinerji.gen.tr/pc-diski-c-2173" : "hdd",
         "https://www.sinerji.gen.tr/guc-kaynagi-c-2030": "psu"
     },
-    "GameGaraj": {
+    "gameGaraj": {
         "https://www.gamegaraj.com/grup/masaustu-bilgisayar/":"gaming_system",
         "https://www.gamegaraj.com/grup/pc-bilesenleri/islemci-oem-urunler/" : "cpu",
         "https://www.gamegaraj.com/grup/pc-bilesenleri/anakart-oem-urunler/": "motherboard",
@@ -20,7 +30,7 @@
         "https://www.gamegaraj.com/grup/pc-bilesenleri/hdd-oem-urunler/" : "hdd",
         "https://www.gamegaraj.com/grup/pc-bilesenleri/guc-kaynagi-oem-urunler/": "psu"
     },
-    "Itopya": {
+    "itopya": {
         "https://www.itopya.com/HazirSistemler":"gaming_system",
         "https://www.itopya.com/islemci_k8": "cpu",
         "https://www.itopya.com/anakart_k9": "motherboard",
@@ -51,15 +61,5 @@
         "https://www.tebilon.com/bilgisayar-parcalari/ssd/" : "ssd",
         "https://www.tebilon.com/bilgisayar-parcalari/hard-disk/"  : "hdd",
         "https://www.tebilon.com/bilgisayar-parcalari/guc-kaynaklari-psu/": "psu"
-    },
-    "teknosa":{
-        "https://www.teknosa.com/oyuncu-bilgisayari-c-116006" : "gaming_system",
-        "https://www.teknosa.com/islemci-c-116001001": "cpu",
-        "https://www.teknosa.com/anakart-c-116001002": "motherboard",
-        "https://www.teknosa.com/ram-c-116001003": "memory",
-        "https://www.teknosa.com/ekran-karti-c-116001004": "gpu",
-        "https://www.teknosa.com/ssd-c-116001008": "ssd",
-        "https://www.teknosa.com/harddisk-c-116001007": "hdd",
-        "https://www.teknosa.com/guc-kaynagi-c-116001005": "psu"
     }
 }

@@ -163,14 +163,14 @@ class WebScraper:
             int: Toplam sayfa sayısı ya da 1 
         """
         try:
-            if site_name == "GameGaraj":
+            if   site_name == "gameGaraj":
                 page_number_element = soup.select_one("body > div.edgtf-wrapper > div > div.edgtf-content > div > div.edgtf-container > div > div > div.edgtf-page-content-holder.edgtf-grid-col-9.edgtf-grid-col-push-3 > nav > ul > li:nth-child(2) > a")
                 if page_number_element:
                     total_pages = int(page_number_element.text.strip())
                 else:
                     total_pages = 1
 
-            elif site_name == "Itopya":
+            elif site_name == "itopya":
                 strong_element = soup.select_one('body > section.container-fluid > div > div.col-12.col-md-9.col-lg-9.col-xl-10 > div:nth-child(5) > div.actions > span > strong')
                 if strong_element:
                     total_pages_text = strong_element.get_text().strip()
@@ -178,7 +178,7 @@ class WebScraper:
                 else:
                     total_pages = 1
 
-            elif site_name == "Sinerji":
+            elif site_name == "sinerji":
                 page_links = soup.select("a[href*='?px=']")
                 total_pages = max(int(link.text) for link in page_links if link.text.isdigit()) if page_links else 1
             
@@ -201,12 +201,14 @@ class WebScraper:
                         total_pages = int(split_text[1].strip().replace(")", "")) - 1
                     else:
                         total_pages = 1
+            
             elif site_name == "tebilon":
                 page_links =  soup.select_one("#mainPage > main > section.showcase > div > div > div.showcase__showcaseProducts.col-md-12.col-sm-12.col-xs-12.mobileShow > div.col-md-12.productSort__paginationBottom > div > a:nth-child(5)")
                 if page_links and page_links.text:
                         total_pages = int(page_links.text)
                 else:
                     total_pages = 1
+            
             else:
                 total_pages = 1
             last_try = total_pages * 3
@@ -230,7 +232,7 @@ class WebScraper:
             list: Ürün bilgilerini içeren sözlükler.
         """
         all_products = []
-        if site_name == "GameGaraj":
+        if   site_name == "gameGaraj":
             products = soup.select("li.product")
             for product in products:
                 price_element = product.select_one(".price ins .woocommerce-Price-amount")
@@ -243,7 +245,7 @@ class WebScraper:
                                     "Üretici": manufacturer.replace('"', '').replace("₺","").strip(), 
                                     "Link": product_link.strip()})
 
-        elif site_name == "Itopya":
+        elif site_name == "itopya":
             for product in soup.select('#productList > div'):
                 link_tag = product.select_one('div.product-body > h2 > a')
                 if link_tag:
@@ -258,7 +260,7 @@ class WebScraper:
                         "Üretici": manufacturer.replace('"','').replace("₺","").strip(), 
                         "Link": product_link.strip()})
 
-        elif site_name == "Sinerji":
+        elif site_name == "sinerji":
             products = soup.select("section article")
             for product in products:
                 title_element = product.select_one("div.title a")
@@ -344,6 +346,9 @@ class WebScraper:
             str: CSV dosyasına kaydedilen ürün sayısını belirten bir mesaj.
         """
         try:
+            if not all_products:
+                return f"{site_name}_{category_name}.csv için kaydedilecek ürün bulunamadı. Hiçbir veri yazılmadı."
+
             df = pd.DataFrame(all_products)
             timestamp_directory = f"{site_name}_{self.formatli_tarih_saat}"
             full_directory = os.path.join(self.main_directory, timestamp_directory)
@@ -442,7 +447,7 @@ class WebScraper:
                 with tqdm(total=total_tasks, desc="İlerleme", unit="kategori") as pbar:
                     for site_name, site_categories in self.config.links.items():
                         for category_pair in site_categories.items():
-                            future = executor.submit(self.scrape_and_log, category_pair, site_name)
+                            future = executor.submit(self.scrape_and_log, category_pair, site_name.lower().strip())
                             future.add_done_callback(lambda _: pbar.update(1)) 
                             futures.append(future)
 

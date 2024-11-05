@@ -46,4 +46,221 @@
         "function_name": "fetch",
         "timestamp": "2024-11-05T06:36:49.608922"
     }
+][
+    {
+        "error_name": "AttributeError",
+        "error_message": "'NoneType' object has no attribute 'text'",
+        "function_name": "scrape_products",
+        "timestamp": "2024-11-05T08:35:10.510981"
+    }
+][
+    {
+        "error_name": "TypeError",
+        "error_message": "cannot unpack non-iterable NoneType object",
+        "function_name": "scrape_and_log",
+        "timestamp": "2024-11-05T08:35:10.581079"
+    }
+][
+    {
+        "error_name": "AttributeError",
+        "error_message": "'NoneType' object has no attribute 'text'",
+        "function_name": "scrape_products",
+        "timestamp": "2024-11-05T08:35:12.160632"
+    }
+][
+    {
+        "error_name": "TypeError",
+        "error_message": "cannot unpack non-iterable NoneType object",
+        "function_name": "scrape_and_log",
+        "timestamp": "2024-11-05T08:35:12.171149"
+    }
+][
+    {
+        "error_name": "AttributeError",
+        "error_message": "'NoneType' object has no attribute 'text'",
+        "function_name": "scrape_products",
+        "timestamp": "2024-11-05T08:36:36.075072"
+    }
+][
+    {
+        "error_name": "TypeError",
+        "error_message": "cannot unpack non-iterable NoneType object",
+        "function_name": "scrape_and_log",
+        "timestamp": "2024-11-05T08:36:36.316025"
+    }
+][
+    {
+        "error_name": "AttributeError",
+        "error_message": "'NoneType' object has no attribute 'text'",
+        "function_name": "scrape_products",
+        "timestamp": "2024-11-05T08:36:51.172851"
+    }
+][
+    {
+        "error_name": "TypeError",
+        "error_message": "cannot unpack non-iterable NoneType object",
+        "function_name": "scrape_and_log",
+        "timestamp": "2024-11-05T08:36:52.444907"
+    }
+][
+    {
+        "error_name": "HTTPError",
+        "error_message": "403 Client Error: Forbidden for url: https://www.teknosa.com/guc-kaynagi-c-116001005?page=8",
+        "function_name": "fetch",
+        "timestamp": "2024-11-05T08:37:32.927404"
+    }
+][
+    {
+        "error_name": "AttributeError",
+        "error_message": "'NoneType' object has no attribute 'text'",
+        "function_name": "scrape_products",
+        "timestamp": "2024-11-05T08:37:41.642366"
+    }
+][
+    {
+        "error_name": "TypeError",
+        "error_message": "cannot unpack non-iterable NoneType object",
+        "function_name": "scrape_and_log",
+        "timestamp": "2024-11-05T08:37:41.762562"
+    }
+][
+    {
+        "error_name": "AttributeError",
+        "error_message": "'NoneType' object has no attribute 'text'",
+        "function_name": "scrape_products",
+        "timestamp": "2024-11-05T08:37:55.369634"
+    }
+][
+    {
+        "error_name": "TypeError",
+        "error_message": "cannot unpack non-iterable NoneType object",
+        "function_name": "scrape_and_log",
+        "timestamp": "2024-11-05T08:37:56.449300"
+    }
+][
+    {
+        "error_name": "AttributeError",
+        "error_message": "'NoneType' object has no attribute 'text'",
+        "function_name": "scrape_products",
+        "timestamp": "2024-11-05T08:39:06.852353"
+    }
+][
+    {
+        "error_name": "TypeError",
+        "error_message": "cannot unpack non-iterable NoneType object",
+        "function_name": "scrape_and_log",
+        "timestamp": "2024-11-05T08:39:06.985086"
+    }
+][
+    {
+        "error_name": "HTTPError",
+        "error_message": "403 Client Error: Forbidden for url: https://www.incehesap.com/ssd-harddisk-fiyatlari/",
+        "function_name": "fetch",
+        "timestamp": "2024-11-05T08:39:12.233769"
+    }
+][
+    {
+        "error_name": "AttributeError",
+        "error_message": "'NoneType' object has no attribute 'text'",
+        "function_name": "scrape_products",
+        "timestamp": "2024-11-05T08:39:22.886438"
+    }
+][
+    {
+        "error_name": "TypeError",
+        "error_message": "cannot unpack non-iterable NoneType object",
+        "function_name": "scrape_and_log",
+        "timestamp": "2024-11-05T08:39:24.089304"
+    }
+][
+    {
+        "error_name": "AttributeError",
+        "error_message": "'NoneType' object has no attribute 'text'",
+        "function_name": "scrape_products",
+        "timestamp": "2024-11-05T08:46:13.191151"
+    }
+][
+    {
+        "error_name": "TypeError",
+        "error_message": "cannot unpack non-iterable NoneType object",
+        "function_name": "scrape_and_log",
+        "timestamp": "2024-11-05T08:46:13.415581"
+    }
+][
+    {
+        "error_name": "AttributeError",
+        "error_message": "'NoneType' object has no attribute 'text'",
+        "function_name": "scrape_products",
+        "timestamp": "2024-11-05T08:46:23.872648"
+    }
+][
+    {
+        "error_name": "TypeError",
+        "error_message": "cannot unpack non-iterable NoneType object",
+        "function_name": "scrape_and_log",
+        "timestamp": "2024-11-05T08:46:24.339569"
+    }
+][
+    {
+        "error_name": "HTTPError",
+        "error_message": "403 Client Error: Forbidden for url: https://www.teknosa.com/oyuncu-bilgisayari-c-116006?page=75",
+        "function_name": "fetch",
+        "timestamp": "2024-11-05T08:48:43.235465"
+    }
+][
+    {
+        "error_name": "HTTPError",
+        "error_message": "403 Client Error: Forbidden for url: https://www.teknosa.com/oyuncu-bilgisayari-c-116006?page=97",
+        "function_name": "fetch",
+        "timestamp": "2024-11-05T08:49:13.369589"
+    }
+][
+    {
+        "error_name": "HTTPError",
+        "error_message": "403 Client Error: Forbidden for url: https://www.teknosa.com/islemci-c-116001001",
+        "function_name": "fetch",
+        "timestamp": "2024-11-05T08:53:07.874029"
+    }
+][
+    {
+        "error_name": "AttributeError",
+        "error_message": "'NoneType' object has no attribute 'text'",
+        "function_name": "scrape_products",
+        "timestamp": "2024-11-05T08:53:13.487754"
+    }
+][
+    {
+        "error_name": "TypeError",
+        "error_message": "cannot unpack non-iterable NoneType object",
+        "function_name": "scrape_and_log",
+        "timestamp": "2024-11-05T08:53:14.395582"
+    }
+][
+    {
+        "error_name": "HTTPError",
+        "error_message": "403 Client Error: Forbidden for url: https://www.incehesap.com/ekran-karti-fiyatlari/",
+        "function_name": "fetch",
+        "timestamp": "2024-11-05T08:53:23.771883"
+    }
+][
+    {
+        "error_name": "AttributeError",
+        "error_message": "'NoneType' object has no attribute 'text'",
+        "function_name": "scrape_products",
+        "timestamp": "2024-11-05T08:53:26.572413"
+    }
+][
+    {
+        "error_name": "TypeError",
+        "error_message": "cannot unpack non-iterable NoneType object",
+        "function_name": "scrape_and_log",
+        "timestamp": "2024-11-05T08:53:27.243605"
+    }
+][
+    {
+        "error_name": "HTTPError",
+        "error_message": "403 Client Error: Forbidden for url: https://www.teknosa.com/oyuncu-bilgisayari-c-116006?page=91",
+        "function_name": "fetch",
+        "timestamp": "2024-11-05T08:56:07.956089"
+    }
 ]
