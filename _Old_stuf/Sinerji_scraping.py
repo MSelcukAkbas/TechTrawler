@@ -42,7 +42,8 @@ def scrape_products(url, category_name):
     if not soup:
         print(f"Sayfa alınamadı: {url}. İşlem durduruluyor.")
         return
-    
+    # body > div.container-fluid > div.row > div.col > section > div:nth-child(1) > article > div.row > div.col > span
+    # body > div.container-fluid > div.row > div.col > section > div:nth-child(1) > article > div.title > ak
     page_links = soup.select("a[href*='?px=']")
     total_pages = max(int(link.text) for link in page_links if link.text.isdigit())
 
@@ -66,11 +67,13 @@ def scrape_products(url, category_name):
                 if ':' in spec_text:
                     key, value = spec_text.split(':', 1)
                     specs_dict[key.strip()] = value.strip()
-
+            price = product.select_one("div.row > div.col > span")
+            price = price.text.replace('"', "").replace("₺","")
             manufacturer = get_manufacturer(product_name)
 
             product_info = {
                 "İsim": product_name,
+                "fiayt": price.strip(),
                 "Üretici": manufacturer if manufacturer else "Bilinmiyor",
                 "Link":"https://www.sinerji.gen.tr" + product_link
             }

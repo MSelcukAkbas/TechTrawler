@@ -44,20 +44,27 @@ class Config:
         except json.JSONDecodeError as e :
             self.save_error_to_json(e)
             return {}
-        
+            
     def save_error_to_json(self, exception):
-        function_name = inspect.currentframe().f_back.f_code.co_name
-        
         error_info = {
-            'error_name': type(exception).__name__, 
-            'error_message': str(exception),          
-            'function_name': function_name,       
-            'timestamp': datetime.now().isoformat() }
+            'error_name': type(exception).__name__,
+            'error_message': str(exception),
+            'function_name': inspect.currentframe().f_back.f_code.co_name,
+            'timestamp': datetime.now().isoformat()
+        }
+
         try:
-            with open(self.error_log, 'a') as file:
-                file.write(json.dumps(error_info) + '\n')
+            with open(self.error_log, 'a+') as file:
+                file.seek(0)  
+                try:
+                    error_data = json.load(file)
+                except (json.JSONDecodeError, ValueError):  
+                    error_data = []
+                error_data.append(error_info)
+                file.seek(0)    
+                json.dump(error_data, file, indent=4)
         except Exception as e:
-            print(f"Dosyaya kaydederken hata oluştu: {e}")
+            print(f"Dosya hatası: {e}")
 
 class PageFetcher:
     def __init__(self, config: Config, retries: int = 5, delay: int = 2):
@@ -228,13 +235,13 @@ class WebScraper:
             for product in products:
                 price_element = product.select_one(".price ins .woocommerce-Price-amount")
                 price = price_element.text.strip() if price_element else "Fiyat yok"
-                title = product.select_one(".edgtf-product-list-title a").text.strip()
+                title = product.select_one(".edgtf-product-list-title a").text
                 product_link = product.select_one(".edgtf-product-list-title a")["href"]
                 manufacturer = self.get_manufacturer(title)
-                all_products.append({"İsim": title, 
-                                    "Fiyat": price, 
-                                    "Üretici": manufacturer, 
-                                    "Link": product_link})
+                all_products.append({"isim": title.replace('"','').replace("₺","").strip(), 
+                                    "Fiyat": price.replace('"','').replace("₺","").strip(), 
+                                    "Üretici": manufacturer.replace('"', '').replace("₺","").strip(), 
+                                    "Link": product_link.strip()})
 
         elif site_name == "Itopya":
             for product in soup.select('#productList > div'):
@@ -246,8 +253,10 @@ class WebScraper:
                     price = price_tag.get_text().strip().replace('\xa0', '').replace('₺', '').strip() if price_tag else "nan"
                     manufacturer = self.get_manufacturer(title) if price != "nan" else "Bilinmiyor"
                     all_products.append({
-                        "İsim": title, "Fiyat": price,
-                        "Üretici": manufacturer, "Link": product_link})
+                        "isim": title.replace('"','').replace("₺","").strip(), 
+                        "Fiyat": price.strip(),
+                        "Üretici": manufacturer.replace('"','').replace("₺","").strip(), 
+                        "Link": product_link.strip()})
 
         elif site_name == "Sinerji":
             products = soup.select("section article")
@@ -263,7 +272,12 @@ class WebScraper:
                         key, value = spec_text.split(':', 1)
                         specs_dict[key.strip()] = value.strip()
                 manufacturer = self.get_manufacturer(product_name)
-                product_info = {"İsim": product_name.replace('"', ''), "Üretici": manufacturer if manufacturer else "Bilinmiyor", "Link": "https://www.sinerji.gen.tr" + product_link}
+                price = product.select_one("div.row > div.col > span")
+                price = price.text.replace('"', "").replace("₺","")
+                product_info = {"isim": product_name.replace('"','').replace("₺","").strip(), 
+                                "Fiyat" : price.strip(),
+                                "Üretici": manufacturer.replace('"','').replace("₺","").strip() if manufacturer else "Bilinmiyor",
+                                "Link": ("https://www.sinerji.gen.tr" + product_link).replace('"','').replace("₺","").strip()}
                 product_info.update(specs_dict)
                 all_products.append(product_info)
         
@@ -277,8 +291,10 @@ class WebScraper:
                 price = price_element.text.strip() if price_element else "Fiyat yok"
                 manufacturer = self.get_manufacturer(title)
                 all_products.append({
-                    "İsim": title, "Fiyat": price,
-                    "Üretici": manufacturer, "Link": product_link})
+                    "isim": title.replace('"','').replace("₺","").strip(), 
+                    "Fiyat": price.replace('"','').replace("₺","").strip(),
+                    "Üretici": manufacturer.replace('"','').replace("₺","").strip(),
+                    "Link": product_link.replace('"','').replace("₺","").strip()})
                 
         elif site_name == "teknosa":
             product_list = soup.select("#product-item")
@@ -289,8 +305,11 @@ class WebScraper:
                 price = product.select_one("input").get('value', "Fiyat bulunamadı") if product.select_one("input") else "Fiyat bulunamadı"
                 manufacturer = title.split()[0] if title != "isim bulunamadı" else "bulunamadı"
                 all_products.append({
-                    "İsim": title, "Fiyat": price,
-                    "Üretici": manufacturer, "Link": product_link})
+                    "isim": title.replace('"','').replace("₺","").strip(), 
+                    "Fiyat": price.replace('"','').replace("₺","").strip(),
+                    "Üretici": manufacturer.replace('"','').replace("₺","").strip(),
+                    "Link": product_link.replace('"','').replace("₺","").strip()})
+                
         elif site_name =="tebilon":
             product_list = soup.select("#allProducts > div > div")
             for product in product_list:
@@ -304,10 +323,10 @@ class WebScraper:
                 manufacturer = title.split()[0] if title != "isim bulunamadı" else "bulunamadı"
                 
                 all_products.append({
-                    "İsim": title,
-                    "Fiyat": price,
-                    "Üretici": manufacturer,
-                    "Link": product_link
+                    "isim": title.replace('"','').replace("₺","").strip(),
+                    "Fiyat": price.replace('"','').replace("₺","").strip(),
+                    "Üretici": manufacturer.replace('"','').replace("₺","").strip(),
+                    "Link": product_link.replace('"','').replace("₺","").strip()
                 })
                             
         return all_products
